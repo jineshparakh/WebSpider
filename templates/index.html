@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+
+    <title>Web Crawler</title>
+    <style>
+        .centered {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="jumbotron jumbotron-fluid" style="background-color: black; color: white">
+        <div class="container">
+            <h1 class="display-4" style="text-align: center">
+                Web Crawler<sup>(&beta;)</sup>
+            </h1>
+            <p class="lead" style="text-align: center">
+                A Web Crawler to Crawl N levels deep, gather words and present to you
+                some valuable insights on it!
+            </p>
+        </div>
+    </div>
+    <div class="col text-center justify-content-center align-self-center" id="loading">
+        <h2>Please Wait till we analyze the data for you!</h2>
+        <br />
+        <h3>It will take some time if the number of levels entered are 2.</h3>
+        <br />
+        <h1>Please Wait......</h1>
+    </div>
+
+    <div id="content">
+        <div class="container">
+            <div class="card text-center">
+                <div class="card-header">Spider</div>
+                <div class="card-body">
+                    <form action="" , method="POST">
+                        {{form.hidden_tag()}}
+                        <!--Adds a CSRF(Cross sight request forgery) token, helps to prevent forms against forgery attack-->
+                        <fieldset class="form-group">
+                            <!-- <legend class="border-bottom mb-4">Welcome Back!</legend> -->
+                            <div class="form-group">
+                                {{form.url.label(class='form-control-label ')}} {%if
+                  form.url.errors%} {{form.url(class='form-control
+                  form-control-lg is-invalid')}}
+                                <div class="invalid-feedback">
+                                    {%for error in form.url.errors%}
+                                    <span>{{error}}</span>
+                                    {%endfor%}
+                                </div>
+
+                                {%else%} {{form.url(class='form-control form-control-lg')}}
+                                {%endif%}
+                            </div>
+                            <div class="form-group">
+                                {{form.levels.label(class='form-control-label ')}} {%if
+                  form.levels.errors%} {{form.levels(class='form-control
+                  form-control-lg is-invalid')}}
+                                <div class="invalid-feedback">
+                                    {%for error in form.levels.errors%}
+                                    <span>{{error}}</span>
+                                    {%endfor%}
+                                </div>
+
+                                {%else%} {{form.levels(class='form-control form-control-lg')}}
+                                {%endif%}
+                            </div>
+                        </fieldset>
+                        <div class="container">
+                            <div class="form-group">
+                                {{form.submit(class='btn btn-outline-success',
+                  onclick="loading();")}}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Copyright -->
+    <footer class="footer fixed-bottom">
+        <div class="container-fluid fixed-bottom" style="color: white; background-color: black">
+            <div class="row justify-content-center">
+                <div class="col-auto">
+                    <p>
+                        Built with &hearts; by
+                        <a href="https://github.com/jineshparakh">Jinesh Parakh</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Copyright -->
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+
+    <script type="text/javascript">
+        // <![CDATA[
+
+        function loading() {
+            $("#loading").show();
+            $("#content").hide();
+        }
+      // ]]>
+    </script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script>
+        $(document).ready(function () {
+            $("#loading").hide();
+        });
+    </script>
+</body>
+
+</html>
