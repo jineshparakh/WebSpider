@@ -64,19 +64,19 @@ e. **Heroku** as a Cloud Platform for deployment of the Web App<br>
 > source venv/bin/activate   #Activate Virtual Environment
 ```
 
-**d. Installing requirements**
+**e. Installing requirements**
 ```
 > pip install -r requirements.txt    #Installing all the requirements for running the project
 ```
 
-**e. Once all the requirements are installed, it's time to run the Flask App**
+**f. Once all the requirements are installed, it's time to run the Flask App**
 ```
 > python app.py    #Starts the Server
 ```
 
 Once the server starts, go to http://127.0.0.1:5000/ to enjoy analyses based on Crawling the URLs
 
-**f. Testing the App with Unit Test Cases**
+**g. Testing the App with Unit Test Cases**
 ```
 > nose2 testcases    #Running Unit Test Cases for the Flask App
 ```
