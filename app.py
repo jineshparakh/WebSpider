@@ -23,6 +23,7 @@ class URLForm(FlaskForm):
         min=1, max=2, message='Please enter a value between 1 and 2'), DataRequired()], default=1)
     submit = SubmitField('Start Crawling')
 
+
 '''
 The main and only route
 '''

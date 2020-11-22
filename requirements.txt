@@ -27,3 +27,5 @@ lxml==4.6.1
 cloudscraper==1.2.48
 nose2==0.9.2
 flask_testing==0.8.0
+asyncio==3.4.3
+futures==3.1.1

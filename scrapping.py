@@ -15,6 +15,8 @@ from nltk.corpus import stopwords
 from collections import Counter
 from nltk import word_tokenize
 from nltk.util import ngrams
+from concurrent.futures import ThreadPoolExecutor
+import asyncio
 
 # Include the list of parents to blacklist, user can change it as per his will
 blacklist = ['[document]', 'noscript', 'header',
@@ -25,7 +27,7 @@ This function is used for getting all links from the Soup
 It is basically a nested function. The getLink(e) function takes a link and makes it a valid URL, if it is not already valid
 The getLink function has all the possible types of URLs that could be gotten from the soup object. It makes them traversabale
 '''
-def getLinksFromSoup(baseURL, soup): 
+def getLinksFromSoup(baseURL, session): 
     def getLink(e):
         link = e["href"]
         if len(link) < 1:
@@ -52,47 +54,63 @@ def getLinksFromSoup(baseURL, soup):
             return ''
     '''
     It maps each link from the soup to the getLink function. After that the getLink function sends back valid URLs one by one
-    '''        
-    allLinks = list(map(getLink, soup.find_all('a', href=True))) 
-    allLinks = [link for link in allLinks if link] #removing empty links from the links gotten from a page
-    return list(set(allLinks)) #remove duplicates and return a list of links
+    '''     
+    try:   
+        response=session.get(baseURL) #getting the page
+    except:
+        return []     
+    if response.ok:
+        html_page = response.text #extracting text from the response
+        soup = BeautifulSoup(html_page, 'lxml') #Creating a soup using the lxml parser
+        allLinks = list(map(getLink, soup.find_all('a', href=True))) 
+        allLinks = [link for link in allLinks if link] #removing empty links from the links gotten from a page
+        return list(set(allLinks)) #remove duplicates and return a list of links
+    return []    
 
 '''
 This function is used for getting all words from the soup
 '''
-def getWordsFromSoup(soup):
-    text = soup.find_all(text=True) #finding out all the text from the soup
-    output = ''
-    outputSentences = []
-    '''
-    Cleaning the text received from the soup. Firstly we will remove all elements having their parents in blacklist 
-    '''
-    for t in text:
-        if t.parent.name not in blacklist:
-            output += '{} '.format(t)
-            outputSentences.append('{} '.format(t))
-    outputSentences = [i.strip() for i in outputSentences]
-    # removing special characters
-    outputSentences = [re.sub('[^a-zA-Z0-9]+', ' ', _)
-                       for _ in outputSentences]
-    # removing all only digit phrases       
-    outputSentences = [' '.join(s for s in i.split() if not any(
-        c.isdigit() for c in s)) for i in outputSentences]
-    #removing empty sentences
-    outputSentences = [i for i in outputSentences if i]
-    #tokenising the sentence phrases using nltk
-    outputSentences = [nltk.tokenize.sent_tokenize(i) for i in outputSentences]
-    words = list(output.split(' '))
-    words = [re.sub('[^a-zA-Z0-9]+', ' ', _) for _ in words]
-    allWords = []
-    #Filtering words and removing words having length less than 2 and numbers
-    for word in words:
-        if len(word) > 2:
-            wordsInCurrent = word.split(' ')
-            for w in wordsInCurrent:
-                if len(w) > 2 and not(w.isdecimal()):
-                    allWords.append(w.lower()) #appending lowercase words to the final list
-    return allWords, outputSentences
+def getWordsFromSoup(link, session):
+    try:
+        response=session.get(link) #getting the page
+    except:
+        return [],[]     
+    if response.ok:
+        html_page = response.text #extracting text from the response
+        soup = BeautifulSoup(html_page, 'lxml') #Creating a soup using the lxml parser
+        text = soup.find_all(text=True) #finding out all the text from the soup
+        output = ''
+        outputSentences = []
+        '''
+        Cleaning the text received from the soup. Firstly we will remove all elements having their parents in blacklist 
+        '''
+        for t in text:
+            if t.parent.name not in blacklist:
+                output += '{} '.format(t)
+                outputSentences.append('{} '.format(t))
+        outputSentences = [i.strip() for i in outputSentences]
+        # removing special characters
+        outputSentences = [re.sub('[^a-zA-Z0-9]+', ' ', _)
+                        for _ in outputSentences]
+        # removing all only digit phrases       
+        outputSentences = [' '.join(s for s in i.split() if not any(
+            c.isdigit() for c in s)) for i in outputSentences]
+        #removing empty sentences
+        outputSentences = [i for i in outputSentences if i]
+        #tokenising the sentence phrases using nltk
+        outputSentences = [nltk.tokenize.sent_tokenize(i) for i in outputSentences]
+        words = list(output.split(' '))
+        words = [re.sub('[^a-zA-Z0-9]+', ' ', _) for _ in words]
+        allWords = []
+        #Filtering words and removing words having length less than 2 and numbers
+        for word in words:
+            if len(word) > 2:
+                wordsInCurrent = word.split(' ')
+                for w in wordsInCurrent:
+                    if len(w) > 2 and not(w.isdecimal()):
+                        allWords.append(w.lower()) #appending lowercase words to the final list
+        return allWords, outputSentences
+    return [],[]    
 
 '''
 This function is used to get all bigrams(words coming together in pair) level by level from all the sentences and phrases we have gotten from the site
@@ -141,6 +159,56 @@ def analyzeWords(allWords):
     w = Counter(words) #making a counter of the words
     return w.most_common(), countOfWordsPerLevel, averageLengthOfWordsPerLevel
 
+
+
+async def check(URLs):
+    res=[]
+    res1=[]
+    res2=[]
+    with ThreadPoolExecutor(max_workers=len(URLs)) as executor:
+        with requests.Session() as session:
+            loop=asyncio.get_event_loop()
+            tasks=[
+                [loop.run_in_executor(executor, getWordsFromSoup, *(link, session)) for link in URLs],
+                [loop.run_in_executor(executor, getLinksFromSoup, *(link, session)) for link in URLs]
+            ]
+        for response1, response2 in await asyncio.gather(*tasks[0]):
+            for r in response1:
+                res.append(r)
+            for r in response2:
+                res1.append(r)    
+        for response in await asyncio.gather(*tasks[1]):
+            for r in response:
+                res2.append(r)     
+    return res,res1, res2
+
+
+async def check1(URLs):
+    res=[]
+    res1=[]
+    with ThreadPoolExecutor(max_workers=max(1,len(URLs))) as executor:
+        with requests.Session() as session:
+            loop=asyncio.get_event_loop()
+            tasks=[
+                [loop.run_in_executor(executor, getWordsFromSoup, *(link, session)) for link in URLs]
+                ]
+        for response1, response2 in await asyncio.gather(*tasks[0]):
+            for r in response1:
+                res.append(r)
+            for r in response2:
+                res1.append(r)       
+    return res,res1   
+
+# URLs=['https://www.ubs.com/in/en.html', 'https://www.google.com']
+# loop=asyncio.get_event_loop()
+# future=asyncio.ensure_future(check(URLs))
+# res,res1, res2=loop.run_until_complete(future)
+# # print(len(res[0][0]))
+# # print(res[0][1])
+# print(res)
+# print(res1)
+# # print(res2)
+
 '''
 This is the main function for starting the scrapping. The parameters it takes are the baseURL and the maximum depth it has to go till.
 I have used cloudscraper instead of requests so that it can handle cloudfare captchas upto some extent. However this opensource version does
@@ -153,76 +221,79 @@ def startScraping(baseURL, maxLevels):
     allSentences = [] # a list to maintain all the sentences and phrases per level
     
     for level in range(0, maxLevels+1):
+        print(level)
         if level == 0:
             visited[baseURL] = 1 #marking the URL visited so that it will not be visited again
-            scraper = cloudscraper.create_scraper() #creating a cloudscraper instance
-            response=scraper.get(baseURL) #getting the page 
-            html_page = response.text #extracting text from the response
-            soup = BeautifulSoup(html_page, 'lxml') #Creating a soup using the lxml parser
-
-            if response.status_code != 404: #if the URL is found
-                links = getLinksFromSoup(baseURL, soup) #calling the getLinks function to return all links on that webpage
-                words, sentences = getWordsFromSoup(soup) #getting allWords and phrases/sentences from that webpage
-                #modifing and inserting in respective lists
-                allWords.append(words)
-                s = []
-                for sentence in sentences:
-                    s.append(sentence[0])
-                allSentences.append(list(s))
-                allURLs.append(baseURL.split())
-                allURLs.append(links)
+            # links = getLinksFromSoup(baseURL) #calling the getLinks function to return all links on that webpage
+            # words, sentences = getWordsFromSoup(baseURL) #getting allWords and phrases/sentences from that webpage
+            #     #modifing and inserting in respective lists
+            l=[]
+            l.append(baseURL)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            future=asyncio.ensure_future(check(l))
+            res,res1, res2=loop.run_until_complete(future)
+            words=res
+            sentences=res1
+            links=res2
+            # print(len(res[0][0]))
+            # print(res[0][1])
+            allWords.append(words)
+            s = []
+            for sentence in sentences:
+                s.append(sentence[0])
+            allSentences.append(list(s))
+            allURLs.append(baseURL.split())
+            allURLs.append(links)
+            # print(allWords)
+            # print(allSentences)
+            # print(allURLs)
         
         elif level == maxLevels:
             #if the level is maxLevel we will not find the links on these pages and just find the words and sentences.
             wordsInCurrentLevel = np.array([])
             sentencesInCurrentLevel = np.array([])
-            for link in allURLs[-1]: #traversing all URL's received from the previous level
-                #only visiting the unvisited URLs and not visiting mails, images, js, etc
+            URLs=[]
+            for link in allURLs[-1]:
                 if link not in visited.keys() and ((not link.startswith("mailto:")) and (not ("javascript:" in link)) and (not link.endswith(".png")) and (not link.endswith(".jpg")) and (not link.endswith(".jpeg"))):
-                    scraper = cloudscraper.create_scraper() #create cloudscraper instance
-                    response=scraper.get(link) #requesting for the page
-                    html_page = response.text #extracting text from the response
-                    soup = BeautifulSoup(html_page, 'lxml')
-                    words, sentences = getWordsFromSoup(soup)
-                    sentencesInCurrentLevel = np.append(
-                        sentencesInCurrentLevel, sentences)
-                    wordsInCurrentLevel = np.append(wordsInCurrentLevel, words)
-                    visited[link] = 1 #marking the URL visited so that it will not be visited again
+                    URLs.append(link)
+                    visited[link]=1
                 else:
                     if link in visited.keys(): #if the link is already visited increase the counter to know about duplicate URLs
                         visited[link] += 1
-            #adding to respective lists            
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            future=asyncio.ensure_future(check1(URLs))
+            wordsInCurrentLevel,sentences=loop.run_until_complete(future)    
+            #adding to respective lists   
+            s = []
+            for sentence in sentences:
+                s.append(sentence[0])         
             allWords.append(list(wordsInCurrentLevel))
-            allSentences.append(list(sentencesInCurrentLevel))
-        
+            allSentences.append(list(s))
+            # print(allWords)
+            # print(allSentences)
         else:
-            URLsInCurrentLevel = []
+            URLs = []
             wordsInCurrentLevel = np.array([])
             sentencesInCurrentLevel = np.array([])
             for link in allURLs[-1]:
                 if link not in visited.keys() and ((not link.startswith("mailto:")) and (not ("javascript:" in link)) and (not link.endswith(".png")) and (not link.endswith(".jpg")) and (not link.endswith(".jpeg"))):
                     visited[link] = 1 #marking the URL visited so that it will not be visited again
-                    try:
-                        scraper = cloudscraper.create_scraper() #creating scrapper instance
-                        response=scrapper.get(link) #getting response
-                        html_page = response.text #extracting html page
-                        soup = BeautifulSoup(html_page, 'lxml')
-                    except:
-                        response.status_code = 404
-                    links = []
-                    #similar process as the previous one, just this time as the level is not the ulimate one, also get the Links on each page
-                    if response.status_code != 404:
-                        links = getLinksFromSoup(link, soup)
-                        words, sentences = getWordsFromSoup(soup)
-                        sentencesInCurrentLevel = np.append(
-                            sentencesInCurrentLevel, sentences)
-                        wordsInCurrentLevel = np.append(
-                            wordsInCurrentLevel, words)
-                        [URLsInCurrentLevel.append(
-                            link) for link in links if link not in visited.keys()]
+                    URLs.append(link)
+                else:
+                    if link in visited.keys():
+                        visited[link]+=1
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)            
+            future=asyncio.ensure_future(check(l))
+            wordsInCurrentLevel,sentences, URLsInCurrentLevel=loop.run_until_complete(future)    
+            s = []
+            for sentence in sentences:
+                s.append(sentence[0])         
             allURLs.append(URLsInCurrentLevel)
             allWords.append(list(wordsInCurrentLevel))
-            allSentences.append(list(sentencesInCurrentLevel))
+            allSentences.append(list(s))
     
     #analyzing the data gotten from crawling
     wordCloudWords, countOfWordsPerLevel, averageLengthOfWordsPerLevel = analyzeWords(
@@ -238,3 +309,18 @@ def startScraping(baseURL, maxLevels):
         bigramCloud.append({"x": key, "value": val, "category": key})
 
     return (wordCloud, countOfWordsPerLevel,  averageLengthOfWordsPerLevel, bigramCloud)
+    for x in allURLs:
+        print(len(x))
+
+    print()
+    for x in allWords:
+        print(len(x))    
+    # print(allURLs)
+    # print(allSentences)
+    # print(allWords)
+
+
+
+# startScraping('https://www.ubs.com/in/en.html', 0)    
+
+
