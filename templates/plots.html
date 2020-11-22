@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <!-- Required meta tags -->
   <meta charset="utf-8">
@@ -13,6 +12,7 @@
   <title>Web Crawler</title>
   <script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
   <script src="https://cdn.anychart.com/releases/v8/js/anychart-tag-cloud.min.js"></script>
+  <!-- Styling the document -->
   <style>
     html,
     body {
@@ -22,10 +22,10 @@
       padding: 0;
     }
 
-    #container,
-    #container0,
-    #container1,
-    #container2 {
+    #wordCloud,
+    #BigramCloud,
+    #CountOfWordsPerLevel,
+    #averageLengthOfWordsPerLevel {
       width: 100%;
       height: 85%;
       margin: 0;
@@ -45,33 +45,60 @@
     <div class="collapse navbar-collapse" id="navbarText">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-          <a class="nav-link" href="#container">Word Cloud<span class="sr-only">(current)</span></a>
+          <a class="nav-link" href="#wordCloud">Word Cloud<span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#container0">Bigram Cloud</a>
+          <a class="nav-link" href="#BigramCloud">Bigram Cloud</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#container1">Words in Each Level</a>
+          <a class="nav-link" href="#CountOfWordsPerLevel">Words in Each Level</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#container2">Average Length of Words in Each Level</a>
+          <a class="nav-link" href="#averageLengthOfWordsPerLevel">Average Length of Words in Each Level</a>
         </li>
-      </ul>
 
+      </ul>
+      <form class="form-inline " id='queryForm'>
+        <input class="form-control mr-sm-2" type="text" placeholder="Enter word to search!" id='word'>
+        <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#queryModal"
+          id='submit'>
+          Search
+        </button>
+      </form>
     </div>
   </nav>
+  <!-- Modal -->
+  <div class="modal fade" id="queryModal" tabindex="-1" role="dialog" aria-labelledby="queryModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="queryModalLabel">Word Frequency finder Results</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id='resultDataFromSearchQuery'>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Let me search something else</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <br>
   <br><br>
-  <div id="container" class='container-fluid'></div>
-  <br>
-  <br><br>
-  <div id="container0" class='container-fluid'></div>
-  <br>
-  <br><br>
-  <div id="container1" class='container-fluid'></div>
-  <br>
-  <br><br>
-  <div id="container2" class='container-fluid'></div>
+  <!-- Container for word cloud -->
+  <div id="wordCloud" class='container-fluid'></div> 
+  <br><br><br>
+  <!-- Container for bigram Cloud -->
+  <div id="BigramCloud" class='container-fluid'></div>
+  <br><br><br>
+  <!-- Container for word count per level -->
+  <div id="CountOfWordsPerLevel" class='container-fluid'></div>
+  <br><br><br>
+  <!-- Container for average length of words per level -->
+  <div id="averageLengthOfWordsPerLevel" class='container-fluid'></div>
   <footer class="footer fixed-bottom">
     <div class="container-fluid  fixed-bottom" style="color: white;background-color: black;">
       <div class="row justify-content-center">
@@ -83,15 +110,13 @@
     </div>
   </footer>
   <script>
+    //Plotting the charts
     anychart.onDocumentReady(function () {
-      // console.log({{ans}})
-      var wordCloudData = {{ wordCloud| tojson
-    }};
+      //Getting data sent via Flask
+    var wordCloudData = {{ wordCloud| tojson}};
     var bigramCloudData = {{ bigramCloud| tojson}};
     var barChartData = {{ wordsInEachLevel| tojson}};
     var lineChartData = {{ AvarageLengthOfWordsInEachLevel| tojson}};
-
-    console.log(wordCloudData);
     // create a tag (word) cloud chart
     var chart = anychart.tagCloud(wordCloudData);
 
@@ -105,7 +130,7 @@
     chart.colorRange().length('100%');
 
     // display the word cloud chart
-    chart.container("container");
+    chart.container("wordCloud");
     chart.draw();
 
     var chart2 = anychart.tagCloud(bigramCloudData);
@@ -120,7 +145,7 @@
     chart2.colorRange().length('100%');
 
     // display the word cloud chart
-    chart2.container("container0");
+    chart2.container("BigramCloud");
     chart2.draw();
 
     barChart = anychart.bar();
@@ -130,7 +155,7 @@
 
     // set the container id
     barChart.title("Count of Words per Level")
-    barChart.container("container1");
+    barChart.container("CountOfWordsPerLevel");
 
     // initiate drawing the chart
     barChart.draw();
@@ -142,7 +167,7 @@
 
     // set the container id
     lineChart.title("Average Length of Words Per Level")
-    lineChart.container("container2");
+    lineChart.container("averageLengthOfWordsPerLevel");
 
     // initiate drawing the chart
     lineChart.draw();
@@ -161,5 +186,58 @@
     integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
     crossorigin="anonymous"></script>
 </body>
+<script type="text/javascript">
+
+  // For the Search query buttton 
+  $(document).ready(function () {
+    $("#submit").click(function () {
+      var elem = document.getElementById('resultDataFromSearchQuery');
+      elem.innerHTML = "";
+      var name = $("#word").val().toLowerCase();
+      var form = document.getElementById("queryForm");
+      form.reset(); //reset the form when one query is submitted
+      // Returns error message when submitted without req fields.  
+      if (name == '') {
+        alert("Search seems empty, please try with some word!");
+      }
+      else {
+        var data = {{ wordCloud| tojson}};
+        var found = 0;
+        var frequency = 0;
+        if (name.split(' ').length === 1) {
+          for (var i = 0; i < data.length; i++) { //scan through the word cloud data and then find whether the word exists or not and it's frequency
+            if (data[i].category === name) {
+              frequency = data[i].value
+              console.log(frequency);
+              found = 1;//word found in the wordCloud Data
+              break; //break once found
+            }
+          }
+      // inserting adjacenet HTML    
+      if (found === 1) {
+        elem.insertAdjacentHTML('afterbegin', '<p>The word that you entered:&nbsp; <b>' + name.toString() + '</b></p><p>The frequency of the word is:&nbsp;<b>' + frequency.toString() + '</b></p>');
+      }
+      else {
+
+        elem.insertAdjacentHTML('afterbegin', '<p>The entered word does not exist in the pages searched!</p><p>The word that you entered:&nbsp; <b>' + name.toString() + '</b></p><p>The frequency of the word is:&nbsp;<b>' + frequency.toString() + '</b></p>');
+      }
+      //show modal after the querying and adding inner HTML
+      $('#queryModal').modal('show'); 
+    }
+    else {
+      alert("Please enter only a single word");
+    }
+  }
+    });
+    //for highlighting the active graph container
+    $( ".mr-auto .nav-item" ).bind( "click", function(event) {
+        var clickedItem = $( this );
+        $( ".mr-auto .nav-item" ).each( function() {
+            $( this ).removeClass( "active" );
+        });
+        clickedItem.addClass( "active" );
+    });
+  });  
+</script>
 
 </html>
