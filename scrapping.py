@@ -71,6 +71,7 @@ def getWordsFromSoup(soup):
             for w in wordsInCurrent:
                 if len(w) > 1 and not(w.isdecimal()):
                     allWords.append(w.lower())
+    print(allWords, outputSentences)                
     return allWords, outputSentences
 
 
