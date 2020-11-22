@@ -1,4 +1,5 @@
 import requests
+import cloudscraper
 from bs4 import BeautifulSoup
 import re
 import nltk
@@ -123,7 +124,8 @@ def startScraping(baseURL, maxLevels):
     for level in range(0, maxLevels+1):
         if level == 0:
             visited[baseURL] = 1
-            response = requests.get(baseURL)
+            scraper = cloudscraper.create_scraper()
+            response=scraper.get(baseURL)
             html_page = response.text
             soup = BeautifulSoup(html_page, 'lxml')
 
@@ -142,7 +144,8 @@ def startScraping(baseURL, maxLevels):
             sentencesInCurrentLevel = np.array([])
             for link in allURLs[-1]:
                 if link not in visited.keys() and ((not link.startswith("mailto:")) and (not ("javascript:" in link)) and (not link.endswith(".png")) and (not link.endswith(".jpg")) and (not link.endswith(".jpeg"))):
-                    response = requests.get(link)
+                    scraper = cloudscraper.create_scraper()
+                    response=scraper.get(link)
                     html_page = response.text
                     soup = BeautifulSoup(html_page, 'lxml')
                     words, sentences = getWordsFromSoup(soup)
@@ -163,7 +166,8 @@ def startScraping(baseURL, maxLevels):
                 if link not in visited.keys() and ((not link.startswith("mailto:")) and (not ("javascript:" in link)) and (not link.endswith(".png")) and (not link.endswith(".jpg")) and (not link.endswith(".jpeg"))):
                     visited[link] = 1
                     try:
-                        response = requests.get(link)
+                        scraper = cloudscraper.create_scraper()
+                        response=scrapper.get(link)
                         html_page = response.text
                         soup = BeautifulSoup(html_page, 'lxml')
                     except:
