@@ -39,13 +39,13 @@ e. **Heroku** as a Cloud Platform for the deployment of the Web App<br>
 
 **a. Clone the repository (Otherwise you can also download the zip file of the repository)**
 ```
-> git clone https://git-rba.hackerrank.com/git/42fc048c-aca2-4ace-874f-9a26af71349f
+> git clone https://github.com/jineshparakh/WebCrawler.git
 ```
 
 **b. Change the directory. (You can also open this project on any IDE, preferably VSCode)**
 
 ```
-> cd 42fc048c-aca2-4ace-874f-9a26af71349f
+> cd WebCrawler
 ```
 
 **c. Setting Up Virtual Environment(Prerequisites: Your System should have Python3 installed)**
