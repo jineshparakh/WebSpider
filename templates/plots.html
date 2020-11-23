@@ -1,190 +1,167 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <!-- Required meta tags -->
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+{%extends 'layout.html'%}
 
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<!-- Styling the document -->
+{%block head%}
+<style>
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
 
-  <title>Web Spider</title>
-  <script src="https://cdn.anychart.com/releases/v8/js/anychart-base.min.js"></script>
-  <script src="https://cdn.anychart.com/releases/v8/js/anychart-tag-cloud.min.js"></script>
-  <!-- Styling the document -->
-  <style>
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
+  #wordCloud,
+  #BigramCloud,
+  #CountOfWordsPerLevel,
+  #averageLengthOfWordsPerLevel {
+    width: 100%;
+    height: 85%;
+    margin: 0;
+    padding: 0;
+  }
+</style>
+{%endblock%}
 
-    #wordCloud,
-    #BigramCloud,
-    #CountOfWordsPerLevel,
-    #averageLengthOfWordsPerLevel {
-      width: 100%;
-      height: 85%;
-      margin: 0;
-      padding: 0;
-    }
-  </style>
-</head>
+{%block body%}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <a class="navbar-brand" href="#">Web Spider<sup>(&beta;)</sup></a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
+    aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarText">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="#wordCloud">Word Cloud<span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#BigramCloud">Bigram Cloud</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#CountOfWordsPerLevel">Words in Each Level</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#averageLengthOfWordsPerLevel">Average Length of Words in Each Level</a>
+      </li>
 
-<body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-    <a class="navbar-brand" href="#">Web Spider<sup>(&beta;)</sup></a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText"
-      aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarText">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="#wordCloud">Word Cloud<span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#BigramCloud">Bigram Cloud</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#CountOfWordsPerLevel">Words in Each Level</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#averageLengthOfWordsPerLevel">Average Length of Words in Each Level</a>
-        </li>
-
-      </ul>
-      <form class="form-inline " id='queryForm'>
-        <input class="form-control mr-sm-2" type="text" placeholder="Enter word to search!" id='word'>
-        <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#queryModal"
-          id='submit'>
-          Search
+    </ul>
+    <form class="form-inline " id='queryForm'>
+      <input class="form-control mr-sm-2" type="text" placeholder="Enter word to search!" id='word'>
+      <button type="button" class="btn btn-outline-success" data-toggle="modal" data-target="#queryModal" id='submit'>
+        Search
+      </button>
+    </form>
+  </div>
+</nav>
+<!-- Modal -->
+<div class="modal fade" id="queryModal" tabindex="-1" role="dialog" aria-labelledby="queryModalLabel"
+  aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="queryModalLabel">Word Frequency finder Results</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
         </button>
-      </form>
-    </div>
-  </nav>
-  <!-- Modal -->
-  <div class="modal fade" id="queryModal" tabindex="-1" role="dialog" aria-labelledby="queryModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="queryModalLabel">Word Frequency finder Results</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body" id='resultDataFromSearchQuery'>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Let me search something else</button>
-        </div>
+      </div>
+      <div class="modal-body" id='resultDataFromSearchQuery'>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Let me search something else</button>
       </div>
     </div>
   </div>
-  <br>
-  <br><br>
-  <!-- Container for word cloud -->
-  <div id="wordCloud" class='container-fluid'></div> 
-  <br><br><br>
-  <!-- Container for bigram Cloud -->
-  <div id="BigramCloud" class='container-fluid'></div>
-  <br><br><br>
-  <!-- Container for word count per level -->
-  <div id="CountOfWordsPerLevel" class='container-fluid'></div>
-  <br><br><br>
-  <!-- Container for average length of words per level -->
-  <div id="averageLengthOfWordsPerLevel" class='container-fluid'></div>
-  <footer class="footer fixed-bottom">
-    <div class="container-fluid  fixed-bottom" style="color: white;background-color: black;">
-      <div class="row justify-content-center">
-        <div class="col-auto">
-          <p>Built with &hearts; by <a href="https://github.com/jineshparakh">Jinesh Parakh</a></p>
+</div>
+<br>
+<br><br>
+<!-- Container for word cloud -->
+<div id="wordCloud" class='container-fluid'></div>
+<br><br><br>
+<!-- Container for bigram Cloud -->
+<div id="BigramCloud" class='container-fluid'></div>
+<br><br><br>
+<!-- Container for word count per level -->
+<div id="CountOfWordsPerLevel" class='container-fluid'></div>
+<br><br><br>
+<!-- Container for average length of words per level -->
+<div id="averageLengthOfWordsPerLevel" class='container-fluid'></div>
+<footer class="footer fixed-bottom">
+  <div class="container-fluid  fixed-bottom" style="color: white;background-color: black;">
+    <div class="row justify-content-center">
+      <div class="col-auto">
+        <p>Built with &hearts; by <a href="https://github.com/jineshparakh">Jinesh Parakh</a></p>
 
-        </div>
       </div>
     </div>
-  </footer>
-  <script>
-    //Plotting the charts
-    anychart.onDocumentReady(function () {
-      //Getting data sent via Flask
+  </div>
+</footer>
+{%endblock%}
+{%block script%}
+<script>
+  //Plotting the charts
+  anychart.onDocumentReady(function () {
+    //Getting data sent via Flask
     var wordCloudData = {{ wordCloud| tojson}};
-    var bigramCloudData = {{ bigramCloud| tojson}};
-    var barChartData = {{ wordsInEachLevel| tojson}};
-    var lineChartData = {{ AvarageLengthOfWordsInEachLevel| tojson}};
-    // create a tag (word) cloud chart
-    var chart = anychart.tagCloud(wordCloudData);
+  var bigramCloudData = {{ bigramCloud| tojson}};
+  var barChartData = {{ wordsInEachLevel| tojson}};
+  var lineChartData = {{ AvarageLengthOfWordsInEachLevel| tojson}};
+  // create a tag (word) cloud chart
+  var chart = anychart.tagCloud(wordCloudData);
 
-    // set a chart title
-    chart.title('Word Cloud Denoting the words on the sites scrapped with their frequencies')
-    // set an array of angles at which the words will be laid out
-    chart.angles([0, -45, 90])
-    // enable a color range
-    chart.colorRange(true);
-    // set the color range length
-    chart.colorRange().length('100%');
+  // set a chart title
+  chart.title('Word Cloud Denoting the words on the sites scrapped with their frequencies')
+  // set an array of angles at which the words will be laid out
+  chart.angles([0, -45, 90])
+  // enable a color range
+  chart.colorRange(true);
+  // set the color range length
+  chart.colorRange().length('100%');
 
-    // display the word cloud chart
-    chart.container("wordCloud");
-    chart.draw();
+  // display the word cloud chart
+  chart.container("wordCloud");
+  chart.draw();
 
-    var chart2 = anychart.tagCloud(bigramCloudData);
+  var chart2 = anychart.tagCloud(bigramCloudData);
 
-    // set a chart title
-    chart2.title('Bigram Cloud')
-    // set an array of angles at which the words will be laid out
-    chart2.angles([0, -45, 90])
-    // enable a color range
-    chart2.colorRange(true);
-    // set the color range length
-    chart2.colorRange().length('100%');
+  // set a chart title
+  chart2.title('Bigram Cloud')
+  // set an array of angles at which the words will be laid out
+  chart2.angles([0, -45, 90])
+  // enable a color range
+  chart2.colorRange(true);
+  // set the color range length
+  chart2.colorRange().length('100%');
 
-    // display the word cloud chart
-    chart2.container("BigramCloud");
-    chart2.draw();
+  // display the word cloud chart
+  chart2.container("BigramCloud");
+  chart2.draw();
 
-    barChart = anychart.bar();
+  barChart = anychart.bar();
 
-    // create a bar series and set the data
-    var series = barChart.bar(barChartData);
+  // create a bar series and set the data
+  var series = barChart.bar(barChartData);
 
-    // set the container id
-    barChart.title("Count of Words per Level")
-    barChart.container("CountOfWordsPerLevel");
+  // set the container id
+  barChart.title("Count of Words per Level")
+  barChart.container("CountOfWordsPerLevel");
 
-    // initiate drawing the chart
-    barChart.draw();
+  // initiate drawing the chart
+  barChart.draw();
 
-    lineChart = anychart.line();
+  lineChart = anychart.line();
 
-    // create a bar series and set the data
-    var series = lineChart.line(lineChartData);
+  // create a bar series and set the data
+  var series = lineChart.line(lineChartData);
 
-    // set the container id
-    lineChart.title("Average Length of Words Per Level")
-    lineChart.container("averageLengthOfWordsPerLevel");
+  // set the container id
+  lineChart.title("Average Length of Words Per Level")
+  lineChart.container("averageLengthOfWordsPerLevel");
 
-    // initiate drawing the chart
-    lineChart.draw();
+  // initiate drawing the chart
+  lineChart.draw();
 });
-  </script>
-  <!-- Copyright -->
-  <!-- Optional JavaScript -->
-  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-    integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-    crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-    crossorigin="anonymous"></script>
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-    crossorigin="anonymous"></script>
-</body>
+</script>
 <script type="text/javascript">
 
   // For the Search query buttton 
@@ -201,17 +178,17 @@
       }
       else {
         var data = {{ wordCloud| tojson}};
-        var found = 0;
-        var frequency = 0;
-        if (name.split(' ').length === 1) {
-          for (var i = 0; i < data.length; i++) { //scan through the word cloud data and then find whether the word exists or not and it's frequency
-            if (data[i].category === name) {
-              frequency = data[i].value
-              console.log(frequency);
-              found = 1;//word found in the wordCloud Data
-              break; //break once found
-            }
-          }
+    var found = 0;
+    var frequency = 0;
+    if (name.split(' ').length === 1) {
+      for (var i = 0; i < data.length; i++) { //scan through the word cloud data and then find whether the word exists or not and it's frequency
+        if (data[i].category === name) {
+          frequency = data[i].value
+          console.log(frequency);
+          found = 1;//word found in the wordCloud Data
+          break; //break once found
+        }
+      }
       // inserting adjacenet HTML    
       if (found === 1) {
         elem.insertAdjacentHTML('afterbegin', '<p>The word that you entered:&nbsp; <b>' + name.toString() + '</b></p><p>The frequency of the word is:&nbsp;<b>' + frequency.toString() + '</b></p>');
@@ -221,22 +198,22 @@
         elem.insertAdjacentHTML('afterbegin', '<p>The entered word does not exist in the pages searched!</p><p>The word that you entered:&nbsp; <b>' + name.toString() + '</b></p><p>The frequency of the word is:&nbsp;<b>' + frequency.toString() + '</b></p>');
       }
       //show modal after the querying and adding inner HTML
-      $('#queryModal').modal('show'); 
+      $('#queryModal').modal('show');
     }
     else {
       alert("Please enter only a single word");
     }
   }
+      });
+  //for highlighting the active graph container
+  $(".mr-auto .nav-item").bind("click", function (event) {
+    var clickedItem = $(this);
+    $(".mr-auto .nav-item").each(function () {
+      $(this).removeClass("active");
     });
-    //for highlighting the active graph container
-    $( ".mr-auto .nav-item" ).bind( "click", function(event) {
-        var clickedItem = $( this );
-        $( ".mr-auto .nav-item" ).each( function() {
-            $( this ).removeClass( "active" );
-        });
-        clickedItem.addClass( "active" );
-    });
-  });  
+    clickedItem.addClass("active");
+  });
+    });  
 </script>
 
-</html>
+{%endblock%}
