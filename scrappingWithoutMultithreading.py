@@ -1,6 +1,3 @@
-
-
-
 '''
 Importing all imports required for scrapping, crawling and analyzing the data from the webpages
 '''
