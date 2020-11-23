@@ -6,9 +6,8 @@ import cloudscraper
 from bs4 import BeautifulSoup
 import re
 import nltk
-# Uncomment This if testing locally
-# nltk.download('punkt')
-# nltk.download('stopwords')
+nltk.download('punkt')
+nltk.download('stopwords')
 import string
 import time
 import numpy as np
