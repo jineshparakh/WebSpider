@@ -159,7 +159,10 @@ def startScraping(baseURL, maxLevels):
         if level == 0:
             visited[baseURL] = 1 #marking the URL visited so that it will not be visited again
             scraper = cloudscraper.create_scraper() #creating a cloudscraper instance
-            response=scraper.get(baseURL) #getting the page 
+            try:
+                response=scraper.get(baseURL) #getting the page 
+            except:
+                continue    
             html_page = response.text #extracting text from the response
             soup = BeautifulSoup(html_page, 'lxml') #Creating a soup using the lxml parser
 
@@ -183,7 +186,10 @@ def startScraping(baseURL, maxLevels):
                 #only visiting the unvisited URLs and not visiting mails, images, js, etc
                 if link not in visited.keys() and ((not link.startswith("mailto:")) and (not ("javascript:" in link)) and (not link.endswith(".png")) and (not link.endswith(".jpg")) and (not link.endswith(".jpeg"))):
                     scraper = cloudscraper.create_scraper() #create cloudscraper instance
-                    response=scraper.get(link) #requesting for the page
+                    try:
+                        response=scraper.get(baseURL) #getting the page 
+                    except:
+                        continue  
                     html_page = response.text #extracting text from the response
                     soup = BeautifulSoup(html_page, 'lxml')
                     words, sentences = getWordsFromSoup(soup)
@@ -207,7 +213,10 @@ def startScraping(baseURL, maxLevels):
                     visited[link] = 1 #marking the URL visited so that it will not be visited again
                     try:
                         scraper = cloudscraper.create_scraper() #creating scrapper instance
-                        response=scrapper.get(link) #getting response
+                        try:
+                            response=scraper.get(baseURL) #getting the page 
+                        except:
+                            continue  
                         html_page = response.text #extracting html page
                         soup = BeautifulSoup(html_page, 'lxml')
                     except:
