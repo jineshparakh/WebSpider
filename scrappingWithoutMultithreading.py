@@ -247,3 +247,11 @@ def startScraping(baseURL, maxLevels):
         bigramCloud.append({"x": key, "value": val, "category": key})
 
     return (wordCloud, countOfWordsPerLevel,  averageLengthOfWordsPerLevel, bigramCloud)
+
+
+
+# BASE_URL='https://www.ubs.com/in/en.html'
+# MAX_LEVEL=2
+
+
+# wordCloud, wordsInEachLevel, AvarageLengthOfWordsInEachLevel, bigramCloud = startScraping(BASE_URL, MAX_LEVEL-1)    

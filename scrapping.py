@@ -293,13 +293,12 @@ def startScraping(baseURL, maxLevels):
     
 
     #analyzing the data gotten from crawling
-    wordCloudWords, countOfWordsPerLevel, averageLengthOfWordsPerLevel = analyzeWords(
-        allWords)
-    #getting bigrams from sentences and phrases    
+    wordCloudWords, countOfWordsPerLevel, averageLengthOfWordsPerLevel = analyzeWords(allWords)  
     allBiagrams = getBigrams(allSentences)
+    # print(allBiagrams)
     wordCloud = []
     bigramCloud = []
-    #formatting the wordCloudWords and allBiagrams for the plotting of graphs
+    # #formatting the wordCloudWords and allBiagrams for the plotting of graphs
     for key, val in wordCloudWords:
         wordCloud.append({"x": key, "value": val, "category": key})
     for key, val in allBiagrams:
