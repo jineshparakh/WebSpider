@@ -10,7 +10,7 @@ Web spider – implement a “spider” that starts with one web page and follow
 
 ### 1. Description
 
-**Web Spider<sup>(&beta;)</sup>** is an **N level Multithreaded Web Crawler** which *dives N levels deep and extracts data from the webpages to provide valuable insights and statistics on the data scrapped.* It used a ***Breadth First Search*** type of approach for crawling the web. It **crawls through webpages level by level in an asynchronous manner using multithreading and extracts words and sentences/phrases from them to give some wonderful statistical insights on the data extracted**. 
+**Web Spider<sup>(&beta;)</sup>** is an **N level Multithreaded Web Spider** which *dives N levels deep and extracts data from the webpages to provide valuable insights and statistics on the data scrapped.* It used a ***Breadth First Search*** type of approach for crawling the web. It **crawls through webpages level by level in an asynchronous manner using multithreading and extracts words and sentences/phrases from them to give some wonderful statistical insights on the data extracted**. 
 
 You can find the deployed project [here](https://my-web-spider.herokuapp.com/)
 
