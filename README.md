@@ -53,7 +53,7 @@ e. **Heroku** as a Cloud Platform for the deployment of the Web App<br>
 ```
 > pip install virtualenv    #Installing the virtual environment module
 > virtualenv venv           #Create virtual environment venv
-````
+```
 **d. Activating Virtual Environment:**<br><br>
 *On Windows (Tested on Windows 10)*
 ```
