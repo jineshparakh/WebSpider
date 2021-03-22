@@ -23,7 +23,7 @@ urllib3==1.26.3
 validators==0.18.1
 Werkzeug==1.0.1
 WTForms==2.3.3
-lxml==4.6.1
+lxml==4.6.3
 cloudscraper==1.2.48
 nose2==0.9.2
 flask_testing==0.8.0
