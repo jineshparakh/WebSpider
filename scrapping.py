@@ -31,8 +31,8 @@ def getLinksFromLinkAndSession(baseURL, session):
     def getLink(e):
         link = e["href"]
         if len(link) < 1:
-            return ''
-        if link.startswith('//'): 
+            return '' 
+        if link.startswith('//'):
             return 'http:'+link
         if link.startswith('?'):
             if baseURL.endswith('/'):
